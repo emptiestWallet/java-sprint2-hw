@@ -12,6 +12,7 @@ public class ReportEngine {
 
     HashMap<String, MonthlyReport> monthlyReports = new HashMap<>();
     HashMap<String, YearlyReport> yearlyReports = new HashMap<>();
+
     public void readMonthlyReports() {
         for (int i = 1; i < 4; i++) {
             String fileName = "m.20210" + i + ".csv";
@@ -122,9 +123,9 @@ public class ReportEngine {
 
             System.out.println("Месяц: " + month);
 
-            ReportEngine.Record mostProfitableItem = null;
+            Record mostProfitableItem = null;
             int maxProfit = 0;
-            for (ReportEngine.Record record : report.incomes) {
+            for (Record record : report.incomes) {
                 int profit = record.price * record.quantity;
                 if (profit > maxProfit) {
                     maxProfit = profit;
@@ -136,9 +137,9 @@ public class ReportEngine {
                 System.out.println("Самый прибыльный товар - " + mostProfitableItem.name + ", его стоимость составляет " + maxProfit);
             }
 
-            ReportEngine.Record largestExpense = null;
+            Record largestExpense = null;
             int maxExpense = 0;
-            for (ReportEngine.Record record : report.expenses) {
+            for (Record record : report.expenses) {
                 int expense = record.quantity * record.price;
                 if (expense > maxExpense) {
                     maxExpense = expense;
@@ -212,7 +213,7 @@ public class ReportEngine {
     Integer calculateMonthlyExpenses(MonthlyReport monthlyReport) {
         int sum = 0;
         for (int i = 0; i < monthlyReport.expenses.size(); i++) {
-            ReportEngine.Record record = monthlyReport.expenses.get(i);
+            Record record = monthlyReport.expenses.get(i);
             sum += record.price * record.quantity;
         }
 
@@ -222,7 +223,7 @@ public class ReportEngine {
     Integer calculateMonthlyIncomes(MonthlyReport monthlyReport) {
         int sum = 0;
         for (int i = 0; i < monthlyReport.incomes.size(); i++) {
-            ReportEngine.Record record = monthlyReport.incomes.get(i);
+            Record record = monthlyReport.incomes.get(i);
             sum += record.price * record.quantity;
         }
 
@@ -232,7 +233,7 @@ public class ReportEngine {
     Integer calculateYearlyExpenses(YearlyReport yearlyReport, String monthNumber) {
         int sum = 0;
         for (int i = 0; i < yearlyReport.expenses.size(); i++) {
-            ReportEngine.Record record = yearlyReport.expenses.get(i);
+            Record record = yearlyReport.expenses.get(i);
 
             if (record.name.equals(monthNumber)) {
                 sum += record.getPrice();
@@ -245,7 +246,7 @@ public class ReportEngine {
     Integer calculateYearlyIncomes(YearlyReport yearlyReport, String monthNumber) {
         int sum = 0;
         for (int i = 0; i < yearlyReport.incomes.size(); i++) {
-            ReportEngine.Record record = yearlyReport.incomes.get(i);
+            Record record = yearlyReport.incomes.get(i);
 
             if (record.name.equals(monthNumber)) {
                 sum += record.getPrice();
@@ -271,12 +272,18 @@ public class ReportEngine {
             MonthlyReport monthlyReport = monthlyReports.get(key);
             YearlyReport  yearlyReport  = yearlyReports.get(key);
 
-            if (!calculateYearlyIncomes(yearlyReport, key).equals(calculateMonthlyIncomes(monthlyReport))) {
+            Integer yearlyIncCalculation = calculateYearlyIncomes(yearlyReport, key);
+            Integer yearlyExpCalculation = calculateYearlyExpenses(yearlyReport, key);
+            Integer monthlyIncCalculation = calculateMonthlyIncomes(monthlyReport);
+            Integer monthlyExpCalculation = calculateMonthlyExpenses(monthlyReport);
+
+
+            if (!yearlyIncCalculation.equals(monthlyIncCalculation)) {
                 System.out.println("Выявлено несоответствие данных по доходам в месяце №" + key);
                 return false;
             }
 
-            if (!calculateYearlyExpenses(yearlyReport, key).equals(calculateMonthlyExpenses(monthlyReport))) {
+            if (!yearlyExpCalculation.equals(monthlyExpCalculation)) {
                 System.out.println("Выявлено несоответствие данных по расходам в месяце №" + key);
                 return false;
             }
@@ -284,38 +291,5 @@ public class ReportEngine {
 
         System.out.println("Данные успешно сверены. Несоответствий не выявлено!");
         return true;
-    }
-
-    static class Record {
-        String name;
-        Integer price;
-        Integer quantity;
-        Boolean isExpense;
-
-
-        public Record(String name, Integer price, Boolean isExpense) {
-            this.name = name;
-            this.price = price;
-            this.isExpense = isExpense;
-        }
-
-        public Record(String name, Boolean isExpense, Integer quantity, Integer price) {
-            this.name = name;
-            this.price = price;
-            this.quantity = quantity;
-            this.isExpense = isExpense;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Integer getPrice() {
-            return price;
-        }
-
-        public Boolean getExpense() {
-            return isExpense;
-        }
     }
 }
